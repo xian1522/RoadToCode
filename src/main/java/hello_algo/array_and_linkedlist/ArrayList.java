@@ -8,21 +8,21 @@ public class ArrayList {
     public int[] nums = new int[capacity];
     public int expendratio = 2;
 
-    private void set(int index, int i1) {
+    public void set(int index, int i1) {
         if(index >= size || index < 0) {
             throw new ArrayIndexOutOfBoundsException("数组越界");
         }
         nums[index] = i1;
     }
 
-    private int get(int index) {
+    public int get(int index) {
         if(index >= size || index < 0) {
             throw new ArrayIndexOutOfBoundsException("数组越界");
         }
         return nums[index];
     }
 
-    private void remove(int index) {
+    public void remove(int index) {
         if(index >= size || index < 0) {
             throw new ArrayIndexOutOfBoundsException("数组越界");
         }
@@ -32,7 +32,7 @@ public class ArrayList {
         size-- ;
     }
 
-    private void insert(int index, int i1) {
+    public void insert(int index, int i1) {
         if(index >= size || index < 0) {
             throw new ArrayIndexOutOfBoundsException("数组越界");
         }
@@ -44,7 +44,7 @@ public class ArrayList {
         expend();
     }
 
-    private int size() {
+    public int size() {
         return size;
     }
 
@@ -52,7 +52,7 @@ public class ArrayList {
         return capacity;
     }
 
-    private int[] toArray() {
+    public int[] toArray() {
         int[] rsNums = new int[size];
         for(int i = 0; i < size; i++){
             rsNums[i] = nums[i];
@@ -60,7 +60,7 @@ public class ArrayList {
         return rsNums;
     }
 
-    private void add(int i) {
+    public void add(int i) {
         expend();
         nums[size] = i;
         size++;
