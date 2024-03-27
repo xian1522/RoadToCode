@@ -5,6 +5,7 @@ import hello_algo.tree.TreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 class Trunk {
     Trunk prev;
@@ -71,5 +72,14 @@ public class PrintUtil {
 
         showTrunks(p.prev);
         System.out.print(p.str);
+    }
+
+    public static void printHeap(Queue<Integer> queue) {
+        List<Integer> list = new ArrayList<>(queue);
+        System.out.print("堆的数组表示：");
+        System.out.println(list);
+        System.out.println("堆的树状表示：");
+        TreeNode root = TreeNode.listToTree(list);
+        printTree(root);
     }
 }
