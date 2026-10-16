@@ -1,8 +1,6 @@
 package sql;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
 
 import java.util.List;
 

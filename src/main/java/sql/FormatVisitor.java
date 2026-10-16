@@ -40,8 +40,7 @@ public class FormatVisitor {
                         .level(level).build());
 
                 ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
-                SetOperationList setOperationList = (parenthesedSelect).getSetOperationList();
-                formatterList.addAll(getSqlFormatter(setOperationList, level + 1));
+                formatterList.addAll(getSqlFormatter(parenthesedSelect.getSelect(), level + 1));
 
                 formatterList.add(SqlFormatter.builder()
                         .text(")" + parenthesedSelect.getAlias().getName())
@@ -88,6 +87,8 @@ public class FormatVisitor {
                                 .text(PlainSelect.orderByToString(setOperationList.getOrderByElements()))
                                 .level(level).build());
             }
+        }else {
+            formatterList.add(SqlFormatter.builder().text(statement.toString()).level(level).build());
         }
         return formatterList;
     }
