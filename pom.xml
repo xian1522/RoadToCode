@@ -54,6 +54,11 @@
             <artifactId>richtextfx</artifactId>
             <version>0.11.2</version>
         </dependency>
+        <dependency>
+            <groupId>fr.inria.gforge.spoon</groupId>
+            <artifactId>spoon-core</artifactId>
+            <version>11.5.0</version>
+        </dependency>
     </dependencies>
 
     <build>
