@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import tool.codeanalysis.CodeAnalysisTool;
 import tool.sqlformat.SqlFormatTool;
 
 /**
@@ -16,6 +17,7 @@ public class App extends Application {
     public void start(Stage stage) {
         ToolRegistry registry = new ToolRegistry();
         registry.register(new SqlFormatTool());
+        registry.register(new CodeAnalysisTool());
 
         MainShell shell = new MainShell(registry);
 

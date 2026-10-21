@@ -21,7 +21,7 @@ public class Main {
         CtModel ctModel = launcher.buildModel();
 
         List<CtMethod> ctMethods = ctModel.getElements(new TypeFilter<>(CtMethod.class));
-
+        CodeScanner codeScanner = new CodeScanner(launcher.getEnvironment());
         for(CtMethod ctMethod : ctMethods) {
             List parameters = ctMethod.getParameters();
             if(!ctMethod.getSimpleName().equals("getSpringFactoriesInstances")) {
@@ -34,10 +34,9 @@ public class Main {
 //            for(CtStatement stmt : statements) {
 //                System.out.println(stmt.getClass() + ":" + stmt);
 //            }
-            CodeScanner codeScanner = new CodeScanner(launcher.getEnvironment());
-            ctMethod.accept(codeScanner);
-            System.out.println(codeScanner.getRoot());
-        }
 
+            ctMethod.accept(codeScanner);
+        }
+        System.out.println(codeScanner.getRoot());
     }
 }
