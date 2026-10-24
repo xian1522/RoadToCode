@@ -17,8 +17,8 @@ public class CodeAiService {
             .readTimeout(120, TimeUnit.SECONDS)
             .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
             .build();
-    private static final String BASE_URL = "";
-    private static final String TOKEN = "";
+    private static final String BASE_URL = "http://192.168.66.224:8080/v1/responses";
+    private static final String TOKEN = "sk-8dae582ca97023127dcb8d7b29098f8747b0cf28494c9965d4a4b246b50865f8";
     private static final String MODEL_NAME = "Qwen3.8-27B";
     private static final String ACTOR_HEADER_VAL = "local-image-extension";
 

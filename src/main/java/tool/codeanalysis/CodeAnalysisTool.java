@@ -39,7 +39,7 @@ public class CodeAnalysisTool implements Tool {
 
     private TreeItem generateTreeItem(TreeNode treeNode) {
 
-        TreeItem treeItem = new TreeItem(treeNode.getContent());
+        TreeItem treeItem = new TreeItem(treeNode.toString());
 
         if(treeNode.hasChildren()) {
             for (TreeNode childNode : treeNode.getChildren()) {

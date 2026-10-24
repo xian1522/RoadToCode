@@ -1,11 +1,10 @@
 package sourcecode.processors;
 
 import sourcecode.processors.model.TreeNode;
+import sourcecode.util.SourceCodeUtil;
 import spoon.compiler.Environment;
-import spoon.reflect.code.CtAssignment;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.*;
+import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -35,8 +34,15 @@ public class CodeScanner extends CtScanner {
         TreeNode treeNode = new TreeNode();
         treeNode.setContent(ctAssignment.toString());
         treeNode.setType("CtAssignment");
+
         System.out.println("ctAssignment: " + treeNode.getContent());
+
         deque.peek().addChild(treeNode);
+        deque.push(treeNode);
+        CtExpression assignment = ctAssignment.getAssignment();
+        if(assignment instanceof CtInvocation) {
+            visitCtInvocation((CtInvocation)assignment);
+        }
         deque.pop();
     }
 
@@ -54,6 +60,20 @@ public class CodeScanner extends CtScanner {
         super.visitCtMethod(ctMethod);
         deque.pop();
     }
+    @Override
+    public void visitCtConstructor(CtConstructor ctConstructor) {
+        TreeNode treeNode = new TreeNode();
+        treeNode.setContent(ctConstructor.getSimpleName());
+        treeNode.setType("CtConstructor");
+        if(deque.isEmpty()) {
+            root = treeNode;
+        }else {
+            deque.peek().addChild(treeNode);
+        }
+        deque.push(treeNode);
+        super.visitCtConstructor(ctConstructor);
+        deque.pop();
+    }
 
     @Override
     public void visitCtLocalVariable(CtLocalVariable ctLocalVariable) {
@@ -67,18 +87,44 @@ public class CodeScanner extends CtScanner {
     }
     @Override
     public void visitCtInvocation(CtInvocation ctInvocation) {
-        TreeNode treeNode = new TreeNode();
-        treeNode.setContent(autoImportPrinter.prettyprint(ctInvocation));
-        treeNode.setType("CtInvocation");
+
+        CtExpression target = ctInvocation.getTarget();
+        if(target instanceof CtConstructorCall consCall) {
+            visitCtConstructorCall(consCall);
+        }
+
         CtExecutableReference executable = ctInvocation.getExecutable();
         CtExecutable declaration = executable.getDeclaration();
         if(declaration instanceof CtMethod) {
-            visitCtMethod((CtMethod)declaration);
+            boolean isRecursiveCall = SourceCodeUtil.isRecursiveCall(ctInvocation);
+            if(!isRecursiveCall) {
+                visitCtMethod((CtMethod)declaration);
+            }
         }else {
+            TreeNode treeNode = new TreeNode();
+            treeNode.setContent(autoImportPrinter.prettyprint(ctInvocation));
+            treeNode.setType("CtInvocation");
             deque.peek().addChild(treeNode);
             deque.push(treeNode);
             System.out.println("ctInvocation: " + treeNode.getContent());
             super.visitCtInvocation(ctInvocation);
+            deque.pop();
+        }
+    }
+    @Override
+    public void visitCtConstructorCall(CtConstructorCall ctConstructorCall) {
+        TreeNode treeNode = new TreeNode();
+        treeNode.setContent(autoImportPrinter.prettyprint(ctConstructorCall));
+        treeNode.setType("CtConstructorCall");
+
+        CtExecutableReference executable = ctConstructorCall.getExecutable();
+        CtConstructor constructor = (CtConstructor)executable.getDeclaration();
+        //JDK jar包中的构造器无法获取,等于null
+        if(constructor != null) {
+            deque.peek().addChild(treeNode);
+            deque.push(treeNode);
+            visitCtConstructor(constructor);
+            System.out.println("ctInvocation: " + treeNode.getContent());
             deque.pop();
         }
     }
