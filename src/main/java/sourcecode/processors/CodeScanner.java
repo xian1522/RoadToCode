@@ -4,21 +4,21 @@ import sourcecode.processors.model.TreeNode;
 import sourcecode.util.SourceCodeUtil;
 import spoon.compiler.Environment;
 import spoon.reflect.code.*;
-import spoon.reflect.declaration.CtConstructor;
-import spoon.reflect.declaration.CtExecutable;
-import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.PrettyPrinter;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.*;
 
 public class CodeScanner extends CtScanner {
     private TreeNode root = new TreeNode();
     private Deque<TreeNode> deque = new ArrayDeque<>();
+
+    // 已展开过的方法/构造器, 防止递归调用(含this(...)转发自环)导致无限递归
+    private final Set<CtMethod> visitedMethods = new HashSet<>();
+    private final Set<CtConstructor> visitedConstructors = new HashSet<>();
 
     // 在Scanner构造器中，基于launcher的env创建autoImport打印机
     private PrettyPrinter autoImportPrinter;
@@ -32,7 +32,7 @@ public class CodeScanner extends CtScanner {
     @Override
     public void visitCtAssignment(CtAssignment ctAssignment) {
         TreeNode treeNode = new TreeNode();
-        treeNode.setContent(ctAssignment.toString());
+        treeNode.setContent(autoImportPrinter.prettyprint(ctAssignment));
         treeNode.setType("CtAssignment");
 
         System.out.println("ctAssignment: " + treeNode.getContent());
@@ -47,8 +47,28 @@ public class CodeScanner extends CtScanner {
     }
 
     public void visitCtMethod(CtMethod ctMethod) {
+        //已展开过则不再展开, 防止方法间互相递归导致无限递归
+        if (!visitedMethods.add(ctMethod)) {
+            return;
+        }
         TreeNode treeNode = new TreeNode();
-        treeNode.setContent(ctMethod.getSimpleName());
+
+        String parentName = "";
+        CtElement parent = ctMethod.getParent();
+        if(parent instanceof CtClass<?>) {
+            parentName = ((CtClass<?>) parent).getSimpleName();
+        }else if(parent instanceof CtInterface<?>) {
+            parentName = ((CtInterface<?>) parent).getSimpleName();
+        }
+        List<CtParameter> parameters = ctMethod.getParameters();
+        String parameter = "";
+        if(!parameters.isEmpty()) {
+            for (CtParameter param : parameters) {
+                parameter += param.getSimpleName() + ",";
+            }
+            parameter = parameter.substring(0, parameter.length() - 1);
+        }
+        treeNode.setContent(parentName + "." + ctMethod.getSimpleName() + "(" + parameter + ")");
         treeNode.setType("CtMethod");
         if(deque.isEmpty()) {
             root = treeNode;
@@ -62,6 +82,10 @@ public class CodeScanner extends CtScanner {
     }
     @Override
     public void visitCtConstructor(CtConstructor ctConstructor) {
+        //已展开过则不再展开, 防止this(...)转发解析错误导致的自环
+        if (!visitedConstructors.add(ctConstructor)) {
+            return;
+        }
         TreeNode treeNode = new TreeNode();
         treeNode.setContent(ctConstructor.getSimpleName());
         treeNode.setType("CtConstructor");
@@ -87,20 +111,34 @@ public class CodeScanner extends CtScanner {
     }
     @Override
     public void visitCtInvocation(CtInvocation ctInvocation) {
+        if(ctInvocation.toString().startsWith("super")
+            || autoImportPrinter.prettyprint(ctInvocation).startsWith("Assert")){
+            return;
+        }
+
+//        if(ctInvocation instanceof CtConstructorCall<?> ctConstructorCall) {
+//            visitCtConstructorCall(ctConstructorCall);
+//        }
 
         CtExpression target = ctInvocation.getTarget();
         if(target instanceof CtConstructorCall consCall) {
             visitCtConstructorCall(consCall);
         }
-
         CtExecutableReference executable = ctInvocation.getExecutable();
         CtExecutable declaration = executable.getDeclaration();
+        //普通方法
         if(declaration instanceof CtMethod) {
             boolean isRecursiveCall = SourceCodeUtil.isRecursiveCall(ctInvocation);
             if(!isRecursiveCall) {
                 visitCtMethod((CtMethod)declaration);
             }
-        }else {
+        //构造方法
+        } else if (declaration instanceof CtConstructor<?>) {
+//            boolean isRecursiveCall = SourceCodeUtil.isRecursiveCall(ctInvocation);
+//            if(!isRecursiveCall) {
+                visitCtConstructor((CtConstructor) declaration);
+//            }
+        } else {
             TreeNode treeNode = new TreeNode();
             treeNode.setContent(autoImportPrinter.prettyprint(ctInvocation));
             treeNode.setType("CtInvocation");
