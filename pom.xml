@@ -48,6 +48,11 @@
             <artifactId>javafx-controls</artifactId>
             <version>21.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>21.0.2</version>
+        </dependency>
         <!-- 富文本代码编辑器 -->
         <dependency>
             <groupId>org.fxmisc.richtext</groupId>
@@ -119,6 +124,12 @@
                 <dependency>
                     <groupId>org.openjfx</groupId>
                     <artifactId>javafx-controls</artifactId>
+                    <version>21.0.2</version>
+                    <classifier>win</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-fxml</artifactId>
                     <version>21.0.2</version>
                     <classifier>win</classifier>
                 </dependency>
