@@ -4,13 +4,17 @@ import app.Tool;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import sourcecode.processors.model.TreeNode;
@@ -36,7 +40,15 @@ public class CodeAnalysisTool implements Tool {
     @FXML
     private Button analyzeButton;
     @FXML
+    private HBox legend;
+    @FXML
+    private Label legendCaret;
+    @FXML
+    private VBox inputPanel;
+    @FXML
     private TreeView<TreeNode> treeView;
+
+    private boolean collapsed;
 
     @Override
     public String getName() {
@@ -53,7 +65,9 @@ public class CodeAnalysisTool implements Tool {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("code-analysis.fxml"));
             loader.setController(this);
-            Node root = loader.load();
+            Parent root = loader.load();
+            // 样式表挂到根节点上（而非 Scene），不依赖 view 何时被加入 Scene
+            root.getStylesheets().add(getClass().getResource("code-analysis.css").toExternalForm());
             bindTreeViewToolTip(treeView);
             return root;
         } catch (IOException e) {
@@ -92,6 +106,16 @@ public class CodeAnalysisTool implements Tool {
         } finally {
             analyzeButton.setDisable(false);
         }
+    }
+
+    @FXML
+    private void onToggleCollapse() {
+        collapsed = !collapsed;
+        for (Node child : inputPanel.getChildren()) {
+            child.setVisible(!collapsed);
+            child.setManaged(!collapsed);
+        }
+        legendCaret.setText(collapsed ? "▸" : "▾");
     }
 
     private void showError(String message) {

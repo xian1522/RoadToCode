@@ -1,0 +1,35 @@
+/* fieldset 外框：白底 + 灰色边框 */
+.fieldset {
+    -fx-background-color: white;
+    -fx-border-color: #a0a0a0;
+    -fx-border-width: 1;
+    -fx-spacing: 0;
+}
+
+/* legend：可点击标题，负上边距让它压在顶边框上，白色背景遮住边框形成缺口 */
+.legend {
+    -fx-background-color: white;
+    -fx-cursor: hand;
+    -fx-padding: 3 8 3 8;
+    -fx-margin-top: -12px;
+}
+
+.legend:hover .legend-title {
+    -fx-text-fill: #1a73e8;
+}
+
+.legend-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.legend-caret {
+    -fx-font-size: 11px;
+    -fx-text-fill: #666666;
+}
+
+/* 内容区内边距 */
+.fieldset-content {
+    -fx-padding: 8 12 12 12;
+}
