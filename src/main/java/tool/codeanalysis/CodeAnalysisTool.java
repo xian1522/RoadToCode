@@ -1,25 +1,23 @@
 package tool.codeanalysis;
 
 import app.Tool;
+import com.alibaba.fastjson2.JSON;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.apache.commons.io.FileUtils;
 import sourcecode.processors.model.TreeNode;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -49,6 +47,8 @@ public class CodeAnalysisTool implements Tool {
     private TreeView<TreeNode> treeView;
 
     private boolean collapsed;
+
+    private final String APPDATA = System.getenv("APPDATA");
 
     @Override
     public String getName() {
@@ -94,11 +94,29 @@ public class CodeAnalysisTool implements Tool {
             showError("请填写方法名");
             return;
         }
-
         analyzeButton.setDisable(true);
+        Path myToolKit = Paths.get(APPDATA)
+                .resolve("MyToolKit\\"
+                + className.substring(className.lastIndexOf(".") + 1)
+                + "_" + methodNameField.getText() + ".json");
         try {
-            TreeNode treeNode = codeAnalysisService.codeAnalysis(projectPath, className, methodName, paramNames);
-            TreeItem<TreeNode> rootItem = generateTreeItem(treeNode);
+
+            File file = new File(myToolKit.toUri());
+            //创建目录
+            FileUtils.createParentDirectories(file);
+            //创建文件
+            boolean newFile = file.createNewFile();
+
+            TreeNode treeNode = null;
+            System.out.println(file);
+            //文件已存在
+            if(!newFile) {
+                String analysisContent = FileUtils.readFileToString(file, "UTF-8");
+                treeNode = JSON.to(TreeNode.class, analysisContent);
+            }else {
+                treeNode = codeAnalysisService.codeAnalysis(projectPath, className, methodName, paramNames);
+            }
+            TreeItem<TreeNode> rootItem = CodeAnalysisTool.generateTreeItem(treeNode);
             treeView.setRoot(rootItem);
             rootItem.setExpanded(true);
         } catch (Exception ex) {
@@ -106,6 +124,32 @@ public class CodeAnalysisTool implements Tool {
         } finally {
             analyzeButton.setDisable(false);
         }
+    }
+
+    /**
+     * 保存解析结果
+     */
+    @FXML
+    private void onSave() {
+        TreeItem<TreeNode> root = treeView.getRoot();
+        if(root == null) {
+            showError("无解析结果可保存");
+            return;
+        }
+        String analysisContent = JSON.toJSONString(root.getValue());
+        String className = classNameField.getText();
+
+        Path myToolKit = Paths.get(APPDATA)
+                .resolve("MyToolKit\\"
+                + className.substring(className.lastIndexOf(".") + 1)
+                + "_" + methodNameField.getText() + ".json");
+
+        try {
+            FileUtils.writeStringToFile(new File(myToolKit.toUri()), analysisContent, "UTF-8");
+        } catch (IOException e) {
+            showError(e.getMessage());
+        }
+        showSuccess("保存成功");
     }
 
     @FXML
@@ -126,12 +170,19 @@ public class CodeAnalysisTool implements Tool {
         alert.showAndWait();
     }
 
-    private TreeItem<TreeNode> generateTreeItem(TreeNode treeNode) {
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+
+    public static TreeItem<TreeNode> generateTreeItem(TreeNode treeNode) {
         TreeItem<TreeNode> treeItem = new TreeItem(treeNode);
         if (treeNode.hasChildren()) {
             for (TreeNode childNode : treeNode.getChildren()) {
-                TreeItem<TreeNode> childItem = generateTreeItem(childNode);
-                treeItem.getChildren().add(childItem);
+                treeItem.getChildren().add(generateTreeItem(childNode));
             }
         }
         return treeItem;

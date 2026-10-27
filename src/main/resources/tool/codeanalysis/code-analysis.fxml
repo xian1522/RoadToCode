@@ -40,6 +40,7 @@
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Button fx:id="analyzeButton" defaultButton="true" onAction="#onAnalyze" text="解析" />
+                        <Button fx:id="saveButton" defaultButton="true" onAction="#onSave" text="保存" />
                     </HBox>
                 </VBox>
             </VBox>
