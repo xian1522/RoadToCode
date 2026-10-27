@@ -1,6 +1,9 @@
 package design_pattern.proxy.jdk_dynamic;
 
 import org.junit.Test;
+import study.design_pattern.proxy.jdk_dynamic.PersonInvocationHandler;
+import study.design_pattern.proxy.jdk_dynamic.PersonService;
+import study.design_pattern.proxy.jdk_dynamic.PersonServiceImpl;
 
 import java.lang.reflect.Proxy;
 

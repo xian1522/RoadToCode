@@ -1,8 +1,8 @@
 package aop;
 
-import aop.proxy.JdkDymamicProxy;
-import aop.service.OrderService;
-import aop.service.OrderServiceImpl;
+import study.aop.proxy.JdkDymamicProxy;
+import study.aop.service.OrderService;
+import study.aop.service.OrderServiceImpl;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;

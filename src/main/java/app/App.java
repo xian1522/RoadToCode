@@ -4,8 +4,8 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import tool.codeanalysis.CodeAnalysisTool;
-import tool.sqlformat.SqlFormatTool;
+import app.tool.codeanalysis.CodeAnalysisTool;
+import app.tool.sqlformat.SqlFormatTool;
 
 /**
  * 工具箱主程序入口。

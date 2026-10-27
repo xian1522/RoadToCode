@@ -2,6 +2,10 @@ package design_pattern.proxy.chain_of_resiponsibility;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import study.design_pattern.chain_of_resiponsibility.Cto;
+import study.design_pattern.chain_of_resiponsibility.Director;
+import study.design_pattern.chain_of_resiponsibility.Handler;
+import study.design_pattern.chain_of_resiponsibility.Manager;
 
 /**
  * 责任链为链式结构，非列表，链上每个处理器都参与处理
